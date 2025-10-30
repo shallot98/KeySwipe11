@@ -1,1 +1,45 @@
+# 工作流名称，会显示在 GitHub Actions 页面
+name: Build Tweak
 
+# 触发工作流的事件
+on:
+  # 当有代码推送到 master 分支时触发
+  push:
+    branches: [ "master", "main" ]
+  # 当有 Pull Request 提交到 master 分支时触发
+  pull_request:
+    branches: [ "master", "main" ]
+  # 允许你手动从 Actions 页面触发此工作流
+  workflow_dispatch:
+
+jobs:
+  # 定义一个名为 "build" 的任务
+  build:
+    # 指定运行此任务的操作系统环境
+    runs-on: macos-latest # 使用最新的 macOS 环境，对 iOS 开发兼容性最好
+
+    steps:
+      # 第一步：检出你的仓库代码
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # 第二步：安装 Theos 和依赖
+      - name: Install Theos
+        uses: theos/sdks@v1 # 使用官方推荐的 Action 来安装带 SDK 的 Theos
+        with:
+          # 你可以指定需要的 iOS SDK 版本，v1 会自动处理
+          sdk: iphoneos16.5
+
+      # 第三步：执行打包命令
+      - name: Build Package
+        run: |
+          make clean package
+
+      # 第四步：上传打包好的 .deb 文件作为构建产物
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          # 构建产物的名称
+          name: deb-package
+          # 要上传的文件的路径，packages 文件夹下所有 .deb 文件都会被上传
+          path: packages/*.deb
