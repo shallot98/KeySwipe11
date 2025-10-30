@@ -1,0 +1,27 @@
+# Theos build artifacts
+.theos/
+obj/
+packages/
+.debmake/
+
+# Compiled Object files
+*.o
+*.dylib
+
+# Package files
+*.deb
+*.ipa
+
+# Xcode
+*.xcodeproj/
+.DS_Store
+
+# Editor files
+*~
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Logs
+*.log
