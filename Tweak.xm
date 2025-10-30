@@ -1,3 +1,6 @@
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import <CoreFoundation/CoreFoundation.h>
 #import <dlfcn.h>
 #import <objc/runtime.h>
 #import <notify.h>
@@ -169,5 +172,5 @@ static void prefsChanged(CFNotificationCenterRef center, void *observer, CFStrin
 %ctor
 {
     prefsChanged(NULL, NULL, NULL, NULL, NULL);
-    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &prefsChanged, (CFStringRef)@"com.delewhopper.keyswipeprefs.reloadPrefs", NULL, 0);
+    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &prefsChanged, (CFStringRef)@"com.delewhopper.keyswipeprefs.reloadPrefs", NULL, CFNotificationSuspensionBehaviorCoalesce);
 }
