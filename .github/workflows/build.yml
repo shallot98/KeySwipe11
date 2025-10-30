@@ -3,6 +3,17 @@ name: Build KeySwipe11
 on:
   workflow_dispatch:
     inputs:
+      package_scheme:
+        description: "Package scheme"
+        default: "rootless"
+        required: false
+        type: choice
+        options:
+          - rootless
+          - rootful
+      theos_target:
+        description: "Theos TARGET (e.g., iphone:clang:latest:16.0)"
+        required: false
       make_target:
         description: "make target to run"
         default: "package"
@@ -34,26 +45,33 @@ jobs:
         run: |
           git clone --recursive https://github.com/theos/theos "$HOME/theos"
           echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
+          echo "THEOS_PLATFORM_SDK_ROOT=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk" >> "$GITHUB_ENV"
 
-      - name: Provide iOS SDKs for Theos
-        run: |
-          git clone https://github.com/theos/sdks.git "$HOME/theos/sdks"
-
-      - name: Build tweak
+      - name: Build tweak (iOS16 + rootless-ready)
         env:
           THEOS: ${{ env.THEOS }}
+          THEOS_PLATFORM_SDK_ROOT: ${{ env.THEOS_PLATFORM_SDK_ROOT }}
         run: |
+          set -euo pipefail
           make clean
-          if [ -n "${{ github.event.inputs.make_target }}" ]; then
-            make ${{ github.event.inputs.make_target }}
+          SCHEME=${{ github.event.inputs.package_scheme }}
+          [ -z "$SCHEME" ] && SCHEME=rootless
+          if [ -n "${{ github.event.inputs.theos_target }}" ]; then
+            TARGET_ARG="TARGET=${{ github.event.inputs.theos_target }}"
           else
-            make package
+            TARGET_ARG=""
           fi
+          if [ -n "${{ github.event.inputs.make_target }}" ]; then
+            MAKE_TGT=${{ github.event.inputs.make_target }}
+          else
+            MAKE_TGT=package
+          fi
+          make $MAKE_TGT THEOS_PACKAGE_SCHEME=$SCHEME $TARGET_ARG
 
       - name: Upload .deb artifact
         uses: actions/upload-artifact@v4
         with:
-          name: keyswipe11-deb
+          name: keyswipe11-${{ github.event.inputs.package_scheme || 'rootless' }}-deb
           path: packages/*.deb
           if-no-files-found: error
 
@@ -65,7 +83,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: keyswipe11-deb
+          name: keyswipe11-${{ github.event.inputs.package_scheme || 'rootless' }}-deb
           path: dist
 
       - name: Publish GitHub Release
