@@ -1,0 +1,9 @@
+Package: com.delewhopper.keyswipe11
+Name: KeySwipe11
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: Swipe keyboard gestures to switch input modes
+Maintainer: DeleWhopper
+Author: DeleWhopper
+Section: Tweaks
+Depends: mobilesubstrate, firmware (>= 12.0)
