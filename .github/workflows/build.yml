@@ -45,7 +45,17 @@ jobs:
         run: |
           git clone --recursive https://github.com/theos/theos "$HOME/theos"
           echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
-          echo "THEOS_PLATFORM_SDK_ROOT=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk" >> "$GITHUB_ENV"
+          # Point to Xcode Developer root so Theos builds path: $THEOS_PLATFORM_SDK_ROOT/Platforms/iPhoneOS.platform/Developer/SDKs
+          echo "THEOS_PLATFORM_SDK_ROOT=$(xcode-select -p)" >> "$GITHUB_ENV"
+          echo "DEVELOPER_DIR=$(xcode-select -p)" >> "$GITHUB_ENV"
+
+      - name: Ensure SDK availability (use Xcode SDKs or fallback to theos/sdks)
+        run: |
+          SDK_DIR="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs"
+          if [ ! -d "$SDK_DIR" ] && [ ! -d "$HOME/theos/sdks" ]; then
+            echo "Xcode iPhoneOS SDKs not found; cloning theos/sdks as fallback"
+            git clone https://github.com/theos/sdks.git "$HOME/theos/sdks"
+          fi
 
       - name: Build tweak (iOS16 + rootless-ready)
         env:
