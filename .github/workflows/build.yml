@@ -11,9 +11,10 @@ on:
         options:
           - rootless
           - rootful
-      theos_target:
-        description: "Theos TARGET (e.g., iphone:clang:latest:16.0)"
-        required: false
+      theos_target: iphone:clang:latest:16.0
+
+        #description: "Theos TARGET (e.g., iphone:clang:latest:16.0)"
+        #required: false
       make_target:
         description: "make target to run"
         default: "package"
